@@ -1,0 +1,50 @@
+# PREP WORK
+git clone --depth=1 --branch=master https://github.com/frej/fast-export.git <fast-export>
+curl "http://repo1.maven.org/maven2/com/madgag/bfg/1.12.15/bfg-1.12.15.jar" -o <bfg-repo-cleaner>/bfg.jar
+mkdir <target> 
+
+# TO CREATE A GIT REPO AT <target> FROM <source>
+cd <source>
+hg log | grep user: | sort | uniq | sed "s/user: *//" > <target>/authors.txt
+cd <target>
+python <authors>/authors.py
+cp <fast-export>/* .
+git init
+git config core.ignoreCase false
+sh hg-fast-export.sh -r <source> --force -A reformatted-authors.txt
+
+# TO CLEAN UP LARGE FILES
+git gc
+java -jar <bfg-repo-cleaner>/bfg.jar --strip-blobs-bigger-than <size> <target>
+git reflog expire --expire=now --all
+git gc --prune=now --aggressive
+
+# TO DELETE CLOSED BRANCHES
+cd <source>
+hg heads --closed --template "{branch}\n" | tr " " "_" | sort > <target>/all.log
+hg heads          --template "{branch}\n" | tr " " "_" | sort > <target>/open.log
+cd <target>
+comm -2 -3 all.log open.log > closed.log
+for branch in `cat closed.log`; do git tag "closed/$branch" $branch; git branch -df $branch; done
+
+# CLEAN-UP WORK
+git checkout master
+git clean -df
+* create .gitignore (do before committing anything):
+    * `find -name ".hgignore"` to find all .hgignore files
+    * rename all .hgignore to .gitignore
+    * rewrite anything under "syntax: regexp" to glob form 
+    * remove "syntax: {glob|regexp}" lines
+
+# OTHER TASKS
+* cloning all branches:
+    git clone --mirror <target> <target-clone>/.git
+    cd <target-clone>
+    git config --local --bool core.bare false
+    git checkout master
+* cloning a specific <branch>:
+    git clone -b <branch> --single-branch <target> <target-clone>
+
+# NOTES
+* use `git pull --rebase` instead of merging local commits to avoid excessive merges
+* merges should typically only happen when merging a distinct branch with master
