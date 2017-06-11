@@ -2,7 +2,7 @@ import re
 
 failed_pattern          = re.compile("^\*\*\*.*$")
 null_author             = re.compile("^<>$")
-visier_prepended        = re.compile("^VISIER\\.*$")
+visier_prepended        = re.compile("^VISIER\\\.*$")
 full_name_no_email      = re.compile("^([A-Z]\w*\s?)+$")
 full_name_null_email    = re.compile("^([A-Z]\w*\s?)+<>$")
 full_name_with_email    = re.compile("^([A-Z]\w*\s?)+<.*>$")
@@ -19,13 +19,13 @@ any_null                = re.compile("^.+$")
 
 
 def email_from_fullname(author):
-    return "email for " + author
+    return "" 
 
 def email_from_username(author):
-    return "email for " + author
+    return "" 
 
 def username_from_email(author):
-    return "dummy_username for " + author
+    return "" 
 
 def replace_author(author):
     if failed_pattern.match(author):
@@ -34,25 +34,25 @@ def replace_author(author):
         return "nulluser " + author
     if visier_prepended.match(author):
         return replace_author(author[7:])
-    if full_name_no_email.match(author):
-        return author.strip() + " <{}>".format(email_from_fullname(author.strip()))
+    if full_name_with_email.match(author):
+        return author
     if full_name_null_email.match(author):
         fullname = author.strip()[:-2].strip()
         return fullname + " <{}>".format(email_from_fullname(fullname))
-    if full_name_with_email.match(author):
+    if full_name_no_email.match(author):
+        return author.strip() + " <{}>".format(email_from_fullname(author.strip()))
+    if username_with_email.match(author):
         return author
-    if username_no_email.match(author):
-        return author.strip() + " <{}>".format(email_from_username(author.strip()))
     if username_null_email.match(author):
         username = author.strip()[:-2].strip()
         return username + " <{}>".format(email_from_username(username))
-    if username_with_email.match(author):
-        return author
+    if username_no_email.match(author):
+        return author.strip() + " <{}>".format(email_from_username(author.strip()))
     if username_sqr_email.match(author):
         return author.replace("[", "<").replace("]", ">")
     if username_rnd_name.match(author):
         username = author.split("(")[0].strip()
-        return username + " " + email_from_username(username)
+        return username + " <{}>".format(email_from_username(username))
     if username_address.match(author):
         username = author.split("@")[0]
         return username + " <{}>".format(email_from_username(username))
@@ -61,8 +61,9 @@ def replace_author(author):
     if null_any.match(author):
         return username_from_email(author[1:-1]) + " " + author
     if any_email.match(author):
-        email = author.split(" ")[-1].strip()
-        return author.replace(email, "<{}>".format(email))
+        bad_email = author.split(" ")[-1]
+        email = bad_email.strip().replace("<", "").replace(">", "")
+        return author.replace(bad_email, "<{}>".format(email))
     if any_null.match(author):
         return "nulluser <>"
 
