@@ -1,14 +1,15 @@
 import re
+import csv
 
 failed_pattern          = re.compile("^\*\*\*.*$")
 null_author             = re.compile("^<>$")
 visier_prepended        = re.compile("^VISIER\\\.*$")
 full_name_no_email      = re.compile("^([A-Z]\w*\s?)+$")
 full_name_null_email    = re.compile("^([A-Z]\w*\s?)+<>$")
-full_name_with_email    = re.compile("^([A-Z]\w*\s?)+<.*>$")
+full_name_with_email    = re.compile("^([A-Z]\w*\s?)+<.+>$")
 username_no_email       = re.compile("^\w*$")
 username_null_email     = re.compile("^\w*\s?<>$")
-username_with_email     = re.compile("^\w*\s?<.*>$")
+username_with_email     = re.compile("^\w*\s?<.+>$")
 username_sqr_email      = re.compile("^\w*\s?\[.*\]$")
 username_rnd_name       = re.compile("^\w*\s?\(.*\)$")
 username_address        = re.compile("^\w*@.*$")
@@ -17,15 +18,18 @@ null_any                = re.compile("^<.*>$")
 any_email               = re.compile("^.+\s\S+@\S+$")
 any_null                = re.compile("^.+$")
 
+with open("users.csv", "r") as users_file:
+    users_reader = csv.reader(users_file, delimiter=',')
+    users = [{"name": user[0], "username": user[1], "email": user[2]} for user in users_reader]
 
 def email_from_fullname(author):
-    return "" 
+    return next((user["email"] for user in users if user["name"] == author), "")
 
 def email_from_username(author):
-    return "" 
+    return next((user["email"] for user in users if user["username"] == author), "")
 
 def username_from_email(author):
-    return "" 
+    return next((user["username"] for user in users if user["email"] == author), "")
 
 def replace_author(author):
     if failed_pattern.match(author):
@@ -67,9 +71,6 @@ def replace_author(author):
     if any_null.match(author):
         return "nulluser <>"
 
-in_authors  = open("authors.txt", "r")
-out_authors = open("reformatted-authors.txt", "w")
-for author in in_authors:
-    out_authors.write("{0}={1}\n".format(author.strip(), replace_author(author).strip()))
-in_authors.close()
-out_authors.close()
+with open("authors.txt", "r") as in_authors, open("reformatted-authors.txt", "w") as out_authors:
+    for author in in_authors:
+        out_authors.write("{0}={1}\n".format(author.strip(), replace_author(author).strip()))
