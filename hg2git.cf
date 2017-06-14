@@ -36,11 +36,12 @@ for branch in `cat closed.log`; do git tag "closed/$branch" $branch; git branch 
 git checkout master -f
 git clean -df
 * create .gitignore:
-    * `find -name ".hgignore"` to find all .hgignore files
-    * rename all .hgignore to .gitignore
-    * rewrite anything under "syntax: regexp" to glob form 
-    * remove "syntax: {glob|regexp}" lines
-    * stage and commit all .gitignore files
+    find . -name ".hgignore" > hgignore-files.log
+    for file in `cat hgignore-files.log`; do 
+        newfile=${file/hgignore/gitignore}; 
+        cp $file $newfile; 
+        sed -E -i.bak "s/syntax:/#syntax:/; s/^\^//; s/\$$//; s/\\\w\+/*/; s/\\\\\//\//g" $newfile; #optional
+    done
 
 # OTHER TASKS
 * cloning repo with all branches:
