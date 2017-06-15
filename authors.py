@@ -1,5 +1,6 @@
 import re
 import csv
+import os
 
 failed_pattern          = re.compile("^\*\*\*.*$")
 null_author             = re.compile("^<>$")
@@ -18,7 +19,7 @@ null_any                = re.compile("^<.*>$")
 any_email               = re.compile("^.+\s\S+@\S+$")
 any_null                = re.compile("^.+$")
 
-with open("users.csv", "r") as users_file:
+with open(os.path.dirname(os.path.abspath(__file__)) + "/users.csv", "r") as users_file:
     users_reader = csv.reader(users_file, delimiter=',')
     users = [{"name": user[0], "username": user[1], "email": user[2]} for user in users_reader]
 
