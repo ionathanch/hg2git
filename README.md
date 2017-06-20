@@ -18,6 +18,7 @@ These scripts will migrate a Mercurial repository to a Git repository using hg-f
 5. To strip out large files from history and delete closed branches, run `./hg2git_clean.sh <source> <target> <bfg-cleaner>`. Files larger than 40M will be stripped. This may take a while.
 6. To copy .hgignore files to .gitignore, convert _some_ of the regex to globs, and commit these files for every branch, run `./hg2git_ignore.sh <target>`. Note that this will convert the repository from bare to non-bare and check out files.
 7. Set an upstream (`git remote add origin <url>`) and push the repository (`git push -u origin master`). This may take a while.
+8. To remove temporary files that were created during the execution of these scripts (.bak, .log, \*authors.txt, hg-fast-export files), run `git clean -df`. 
 
 ## TL;DR
 1. `./hg2git.sh <source> <target> <authors> <fast-export>`
@@ -26,3 +27,4 @@ These scripts will migrate a Mercurial repository to a Git repository using hg-f
 4. `./hg2git_clean.sh <source> <target> <bfg-cleaner>`
 5. `./hg2git_ignore.sh <target>`
 6. `git remote add origin <url> && git push -u origin master`
+7. `git clean -df`
