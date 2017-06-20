@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 unset source
 unset target
 unset bfg_cleaner
