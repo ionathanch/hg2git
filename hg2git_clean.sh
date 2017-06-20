@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 unset source
 unset target
 unset bfg_cleaner
@@ -28,15 +30,5 @@ cd $target
 comm -2 -3 all.log open.log > closed.log
 for branch in `cat closed.log`; do git tag "closed/$branch" $branch; git branch -df $branch; done
 
-# TODO: Loop this for each open branch
-echo "Creating .gitignore files from .hgignore files..."
-find . -name ".hgignore" > hgignore-files.log
-touch gitignore-files.log
-for file in `cat hgignore-files.log`; do
-    newfile=${file/hgignore/gitignore};
-    echo $newfile >> gitignore-files.log
-    cp $file $newfile;
-    sed -i.bak "s/syntax:/#syntax:/; s/^\^//; s/\$$//; s/\\\w\+/*/; s/\\\\\//\//g" $newfile;
-done
-
-echo "All done! This Git repository is now ready to be pushed after the .gitignore files have been committed to the desired branches."
+echo "All done! This Git repository is now ready to be pushed."
+echo "If you'd like to create and commit some .gitignore files, run hg2git_ignore.sh."
