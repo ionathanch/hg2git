@@ -2,17 +2,17 @@
 git clone --depth=1 --branch=master https://github.com/frej/fast-export.git <fast-export>
 curl "http://repo1.maven.org/maven2/com/madgag/bfg/1.12.15/bfg-1.12.15.jar" -o <bfg-repo-cleaner>/bfg.jar
 cp {authors.py,users.csv} <authors>
-mkdir <target> 
+mkdir <git-target> 
 
-# TO CREATE A GIT REPO AT <target> FROM <source>
-cd <source>
-hg log | grep user: | sort | uniq | sed "s/user: *//" > <target>/authors.txt
-cd <target>
+# TO CREATE A GIT REPO AT <git-target> FROM <hg-source>
+cd <hg-source>
+hg log | grep user: | sort | uniq | sed "s/user: *//" > <git-target>/authors.txt
+cd <git-target>
 python <authors>/authors.py
 cp <fast-export>/* .
 git init
 git config core.ignoreCase false
-sh hg-fast-export.sh -r <source> --force -A reformatted-authors.txt
+./hg-fast-export.sh -r <hg-source> --force -A reformatted-authors.txt
 git config --bool core.bare true
 
 # WARNING !!!
@@ -22,15 +22,15 @@ git config --bool core.bare true
 
 # TO CLEAN UP LARGE FILES
 git gc
-java -jar <bfg-repo-cleaner>/bfg.jar --strip-blobs-bigger-than <size> <target> # <size> == ~40M
+java -jar <bfg-repo-cleaner>/bfg.jar --strip-blobs-bigger-than <size> <git-target> # <size> == ~40M
 git reflog expire --expire=now --all
 git gc --prune=now --aggressive
 
 # TO DELETE ALL CLOSED BRANCHES
-cd <source>
-hg heads --closed --template "{branch}\n" | tr " " "_" | sort > <target>/all.log
-hg heads          --template "{branch}\n" | tr " " "_" | sort > <target>/open.log
-cd <target>
+cd <hg-source>
+hg heads --closed --template "{branch}\n" | tr " " "_" | sort > <git-target>/all.log
+hg heads          --template "{branch}\n" | tr " " "_" | sort > <git-target>/open.log
+cd <git-target>
 comm -2 -3 all.log open.log > closed.log
 for branch in `cat closed.log`; do git tag "closed/$branch" $branch; git branch -df $branch; done
 
@@ -43,19 +43,25 @@ for file in `cat hgignore-files.log`; do
     sed -i.bak "s/syntax:/#syntax:/; s/^\^//; s/\$$//; s/\\\w\+/*/; s/\\\\\//\//g" $newfile; # optional
 done
 cat gitignore-files.log | xargs git add
-git clean -df && git commit -m "Added gitignore files" && git push 
+git clean -df && git commit -m "Added gitignore files" 
+
+# CLEANUP
+rm -rfi * # removes everything except dotfiles!!! 
 
 # OTHER TASKS
 * cloning non-bare mirror repo with all branches:
-    git clone --mirror <target> <target-clone>/.git
-    cd <target-clone>
+    git clone --mirror <git-target> <git-target-clone>/.git
+    cd <git-target-clone>
     git config --local --bool core.bare false
     git checkout master
 * cloning repo with a specific <branch>:
-    git clone -b <branch> --single-branch <target> <target-clone>
+    git clone -b <branch> --single-branch <git-target> <git-target-clone>
 * serving git repo
     git daemon --base-path=. --export-all --reuseaddr --informative-errors --verbose
     * URL: git://10.0.33.167/
 * convert bare repo to non-bare
-    git config --bool core.bare true
+    git config --bool core.bare false 
     git checkout master -f
+
+# NOTES
+rm -rf com.visiercorp.vserver-git-bfg && git clone --mirror com.visiercorp.vserver-git com.visiercorp.vserver-git-bfg/.git && cd com.visiercorp.vserver-git-bfg && git gc && java -jar ../hg-git-migration/bfg.jar --strip-blobs-bigger-than 40M . && git reflog expire --expire=now --all && git gc --prune=now --aggressive
