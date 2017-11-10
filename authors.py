@@ -88,4 +88,4 @@ def replace_author(author):
 
 with open("authors.txt", "r") as in_authors, open("reformatted-authors.txt", "w") as out_authors:
     for author in in_authors:
-        out_authors.write("{0}={1}\n".format(author.strip(), replace_author(author).strip()))
+        out_authors.write("\"{0}\"=\"{1}\"\n".format(author.strip(), replace_author(author).strip()))
