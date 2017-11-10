@@ -25,19 +25,19 @@ with open(os.path.dirname(os.path.abspath(__file__)) + "/users.csv", "r") as use
     users = [{"name": user[0], "username": user[1], "email": user[2]} for user in users_reader]
 
 def email_from_fullname(author):
-    return next((user["email"] for user in users if user["name"] == author), "")
+    return next((user["email"] for user in users if user["name"].lower() == author.lower()), "")
 
 def email_from_username(author):
-    return next((user["email"] for user in users if user["username"] == author), "")
+    return next((user["email"] for user in users if user["username"].lower() == author.lower()), "")
 
 def username_from_email(author):
-    return next((user["username"] for user in users if user["email"] == author), "")
+    return next((user["username"] for user in users if user["email"].lower() == author.lower()), "")
 
 def username_from_fullname(author):
-    return next((user["username"] for user in users if user["name"] == author), "")
+    return next((user["username"] for user in users if user["name"].lower() == author.lower()), "")
 
 def username_from_firstname_lastname(author):
-    return next((user["username"] for user in users if user["name"].casefold() == author.replace(".", " ").casefold()), "")
+    return next((user["username"] for user in users if user["name"].lower() == author.replace(".", " ").lower()), "")
 
 def replace_author(author):
     if failed_pattern.match(author):
@@ -48,12 +48,15 @@ def replace_author(author):
         return replace_author(author[7:])
     if full_name_with_email.match(author):
         fullname = author.split("<")[0].strip()
-        return username_from_fullname(fullname) + " <{}>".format(email_from_fullname(fullname))
+        email = author.split("<")[1].split(">")[0].strip()
+        username = username_from_email(email)
+        return (username if username else fullname) + " <{}>".format(email)
     if full_name_null_email.match(author):
         fullname = author.strip()[:-2].strip()
         return username_from_fullname(fullname) + " <{}>".format(email_from_fullname(fullname))
     if full_name_no_email.match(author):
-        return username_from_fullname(author.strip()) + " <{}>".format(email_from_fullname(author.strip()))
+        username = username_from_fullname(author.strip())
+        return (username if username else author.strip()) + " <{}>".format(email_from_fullname(author.strip()))
     if username_with_email.match(author):
         return author
     if username_null_email.match(author):
@@ -71,7 +74,7 @@ def replace_author(author):
         return username + " <{}>".format(email_from_username(username))
     if first_last_name.match(author):
         username = username_from_firstname_lastname(author)
-        return username + " <{}>".format(email_from_username(username))
+        return (username if username else author.strip()) + " <{}>".format(email_from_username(username))
     if any_any.match(author):
         return author
     if null_any.match(author):
