@@ -2,9 +2,9 @@ format                              matches                 replace
 ------                              -------                 -------
 *** failed to import...             ^\*\*\*.*$              "nulluser <>"
 <>                                  ^<>$                    prepend with "nulluser "
-Full Name                           ^([A-Z]\w*\s?)+$        append  with <email>
-Full Name <>                        ^([A-Z]\w*\s?)+<>$      <> with <email>
-Full Name <name@email.com>          ^([A-Z]\w*\s?)+<.*>$    do nothing
+Full Name                           ^([A-Z]\w*\s?)+$        fullname with username and append  with <email>
+Full Name <>                        ^([A-Z]\w*\s?)+<>$      fullname with username and <> with <email>
+Full Name <name@email.com>          ^([A-Z]\w*\s?)+<.*>$    fullname with username
 VISIER\username <name@email.com>    ^VISIER\\.*$            drop 7 and recurse
 username                            ^\w*$                   append  with <email>
 username <>                         ^\w*\s?<>$              <> with <email>
@@ -12,6 +12,7 @@ username <name@email.com>           ^\w*\s?<.*>$            do nothing
 username [name@email.com]           ^\w*\s?\[.*\]$          [ with < and ] with >
 username (Full Name)                ^\w*\s?\(.*\)$          \s?\(.*\) with \s<email>
 username@address.com                ^\w*@.*$                @.* with \s<email>
+firstname.lastname                  ^\w*\.\w*$              username <email> from fullname from firstname.lastname
 anything <anything>                 ^.+<.*>$                do nothing
 <anything>                          ^<.*>$                  prepend with user
 anything name@email.com             ^.+\s\S+@\S+$           wrap email with <>

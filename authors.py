@@ -5,15 +5,16 @@ import os
 failed_pattern          = re.compile("^\*\*\*.*$")
 null_author             = re.compile("^<>$")
 visier_prepended        = re.compile("^VISIER\\\.*$")
-full_name_no_email      = re.compile("^([A-Z]\w*\s?)+$")
-full_name_null_email    = re.compile("^([A-Z]\w*\s?)+<>$")
-full_name_with_email    = re.compile("^([A-Z]\w*\s?)+<.+>$")
-username_no_email       = re.compile("^\w*$")
-username_null_email     = re.compile("^\w*\s?<>$")
-username_with_email     = re.compile("^\w*\s?<.+>$")
-username_sqr_email      = re.compile("^\w*\s?\[.*\]$")
-username_rnd_name       = re.compile("^\w*\s?\(.*\)$")
-username_address        = re.compile("^\w*@.*$")
+full_name_no_email      = re.compile("^([A-Z][\w\-]*\s?)+$")
+full_name_null_email    = re.compile("^([A-Z][\w\-]*\s?)+<>$")
+full_name_with_email    = re.compile("^([A-Z][\w\-]*\s?)+<.+>$")
+username_no_email       = re.compile("^[\w\-]*$")
+username_null_email     = re.compile("^[\w\-]*\s?<>$")
+username_with_email     = re.compile("^[\w\-]*\s?<.+>$")
+username_sqr_email      = re.compile("^[\w\-]*\s?\[.*\]$")
+username_rnd_name       = re.compile("^[\w\-]*\s?\(.*\)$")
+username_address        = re.compile("^[\w\-]*@.*$")
+first_last_name         = re.compile("^[\w\-]*\.[\w\-]*$")
 any_any                 = re.compile("^.+<.*>$")
 null_any                = re.compile("^<.*>$")
 any_email               = re.compile("^.+\s\S+@\S+$")
@@ -32,6 +33,12 @@ def email_from_username(author):
 def username_from_email(author):
     return next((user["username"] for user in users if user["email"] == author), "")
 
+def username_from_fullname(author):
+    return next((user["username"] for user in users if user["name"] == author), "")
+
+def username_from_firstname_lastname(author):
+    return next((user["username"] for user in users if user["name"].casefold() == author.replace(".", " ").casefold()), "")
+
 def replace_author(author):
     if failed_pattern.match(author):
         return "nulluser <>"
@@ -40,12 +47,13 @@ def replace_author(author):
     if visier_prepended.match(author):
         return replace_author(author[7:])
     if full_name_with_email.match(author):
-        return author
+        fullname = author.split("<")[0].strip()
+        return username_from_fullname(fullname) + " <{}>".format(email_from_fullname(fullname))
     if full_name_null_email.match(author):
         fullname = author.strip()[:-2].strip()
-        return fullname + " <{}>".format(email_from_fullname(fullname))
+        return username_from_fullname(fullname) + " <{}>".format(email_from_fullname(fullname))
     if full_name_no_email.match(author):
-        return author.strip() + " <{}>".format(email_from_fullname(author.strip()))
+        return username_from_fullname(author.strip()) + " <{}>".format(email_from_fullname(author.strip()))
     if username_with_email.match(author):
         return author
     if username_null_email.match(author):
@@ -60,6 +68,9 @@ def replace_author(author):
         return username + " <{}>".format(email_from_username(username))
     if username_address.match(author):
         username = author.split("@")[0]
+        return username + " <{}>".format(email_from_username(username))
+    if first_last_name.match(author):
+        username = username_from_firstname_lastname(author)
         return username + " <{}>".format(email_from_username(username))
     if any_any.match(author):
         return author
