@@ -4,7 +4,6 @@ import os
 
 failed_pattern          = re.compile("^\*\*\*.*$")
 null_author             = re.compile("^<>$")
-visier_prepended        = re.compile("^VISIER\\\.*$")
 full_name_no_email      = re.compile("^([A-Z][\w\-]*\s?)+$")
 full_name_null_email    = re.compile("^([A-Z][\w\-]*\s?)+<>$")
 full_name_with_email    = re.compile("^([A-Z][\w\-]*\s?)+<.+>$")
@@ -44,8 +43,6 @@ def replace_author(author):
         return "nulluser <>"
     if null_author.match(author):
         return "nulluser " + author
-    if visier_prepended.match(author):
-        return replace_author(author[7:])
     if full_name_with_email.match(author):
         fullname = author.split("<")[0].strip()
         email = author.split("<")[1].split(">")[0].strip()

@@ -5,7 +5,6 @@ format                              matches                 replace
 Full Name                           ^([A-Z]\w*\s?)+$        fullname with username and append  with <email>
 Full Name <>                        ^([A-Z]\w*\s?)+<>$      fullname with username and <> with <email>
 Full Name <name@email.com>          ^([A-Z]\w*\s?)+<.*>$    fullname with username
-VISIER\username <name@email.com>    ^VISIER\\.*$            drop 7 and recurse
 username                            ^\w*$                   append  with <email>
 username <>                         ^\w*\s?<>$              <> with <email>
 username <name@email.com>           ^\w*\s?<.*>$            do nothing

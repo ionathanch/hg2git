@@ -15,7 +15,7 @@ fi
 
 echo "Stripping out large files with BFG Repo-Cleaner..."
 mkdir -p $bfg_cleaner
-curl "http://repo1.maven.org/maven2/com/madgag/bfg/1.12.15/bfg-1.12.15.jar" -o $bfg_cleaner/bfg.jar
+curl "https://repo1.maven.org/maven2/com/madgag/bfg/1.14.0/bfg-1.14.0.jar" -o $bfg_cleaner/bfg.jar
 java -jar $bfg_cleaner/bfg.jar --strip-blobs-bigger-than 40M $target
 git reflog expire --expire=now --all
 git gc --prune=now --aggressive

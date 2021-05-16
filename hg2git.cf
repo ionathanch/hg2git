@@ -17,7 +17,7 @@ git config --bool core.bare true
 
 # WARNING !!!
 # -----------
-# VSERVER HAS DIFFICULTY RUNNING HG-FAST-EXPORT AFTER THE FOLLOWING HAVE BEEN DONE.
+# RUNNING HG-FAST-EXPORT AFTER THE FOLLOWING HAVE BEEN DONE IS DIFFICULT.
 # DO NOT EXECUTE ANY OF THE FOLLOWING UNTIL YOU ARE SURE GIT NO LONGER NEEDS TO SYNC WITH HG!!
 
 # TO CLEAN UP LARGE FILES
@@ -62,6 +62,3 @@ rm -rfi * # removes everything except dotfiles!!!
 * convert bare repo to non-bare
     git config --bool core.bare false 
     git checkout master -f
-
-# NOTES
-rm -rf com.visiercorp.vserver-git-bfg && git clone --mirror com.visiercorp.vserver-git com.visiercorp.vserver-git-bfg/.git && cd com.visiercorp.vserver-git-bfg && git gc && java -jar ../hg-git-migration/bfg.jar --strip-blobs-bigger-than 40M . && git reflog expire --expire=now --all && git gc --prune=now --aggressive
